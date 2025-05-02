@@ -84,6 +84,7 @@ const SubTitle = styled.p`
 
 const Line = styled.hr`
    width: 100%;
+   margin: 0;
    border: 1px solid black;
 `
 
