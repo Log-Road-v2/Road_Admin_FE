@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import styled from "@emotion/styled";
 import Font from "../styles/Font";
 import Color from "../styles/Color";
@@ -16,18 +17,20 @@ interface PropsType {
 
 const Modal = ({ title, subTitle, text, children, isOpen, onClose }: PropsType) => {
 
-   if (isOpen) {
-      document.body.style.overflow = 'hidden';
-   } else {
-      document.body.style.overflow = 'auto';
-   }
+   useEffect(() => {
+      document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+
+      return () => {
+         document.body.style.overflow = 'auto';
+      };
+   }, [isOpen]);
 
    return (
       <>
          <Background isOpen={isOpen}>
             <ModalContainer>
                <CancelWrapper>
-                  <Cancel onClick={onClose}/>
+                  <Cancel onClick={onClose ? onClose : undefined} />
                </CancelWrapper>
                <div>
                   <Title>{title}</Title>
@@ -82,6 +85,7 @@ const SubTitle = styled.p`
 const Line = styled.hr`
    width: 100%;
    border: 1px solid black;
+   margin: 0;
 `
 
 
