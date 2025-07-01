@@ -1,5 +1,7 @@
-import {Route, Routes, BrowserRouter} from "react-router-dom"
+import { Route, Routes, BrowserRouter } from "react-router-dom"
 import GlobalStyle from "./styles/GlobalStyles"
+import Layout from "./components/Layout"
+import StudentManager from "./pages/StudentManager"
 
 
 export const Router = () => {
@@ -7,7 +9,9 @@ export const Router = () => {
     <BrowserRouter>
       <GlobalStyle />
       <Routes>
-        <Route />
+        <Route element={<Layout />}>
+          <Route path="/student" element={<StudentManager />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
