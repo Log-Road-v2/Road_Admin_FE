@@ -6,6 +6,7 @@ import { Pagination } from "../../components/Pagination";
 import { Color } from "../../styles";
 import { useState, useRef, useEffect } from "react";
 import { EditDeleteModal } from "../../components/Manager/EditDeleteModal";
+import NoPage from "../../components/NoPage";
 
 const StudentManager = () => {
   const tableHeaderLabel = ["기수", "학년", "반", "번호", "이름", "상태"];
@@ -60,6 +61,7 @@ const StudentManager = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const hasStudentData = true;
 
   return (
     <S.ManagerContainer>
@@ -107,28 +109,35 @@ const StudentManager = () => {
                 <S.TableHeaderCell key={index}>{label}</S.TableHeaderCell>
               ))}
             </S.TableHeaderRow>
-            <S.TableBody>
-              <S.StudentRow>
-                <S.StudentDataGroup>
-                  <S.HighlightedText>1</S.HighlightedText>
-                  <S.Text>3</S.Text>
-                  <S.Text>1</S.Text>
-                  <S.Text>14</S.Text>
-                  <S.Text>임다영</S.Text>
-                  <S.HighlightedText>재학중</S.HighlightedText>
-                </S.StudentDataGroup>
+            {
+              hasStudentData ? (
+                <S.TableBody>
+                  <S.StudentRow>
+                    <S.StudentDataGroup>
+                      <S.HighlightedText>1</S.HighlightedText>
+                      <S.Text>3</S.Text>
+                      <S.Text>1</S.Text>
+                      <S.Text>14</S.Text>
+                      <S.Text>임다영</S.Text>
+                      <S.HighlightedText>재학중</S.HighlightedText>
+                    </S.StudentDataGroup>
 
-                <div style={{ position: "relative" }} ref={modalRef}>
-                  <Dots size={20} color={Color.gray300} onClick={handleDotsClick} />
-                  {isModalOpen && (
-                    <EditDeleteModal
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  )}
-                </div>
-              </S.StudentRow>
-            </S.TableBody>
+                    <div style={{ position: "relative" }} ref={modalRef}>
+                      <Dots size={20} color={Color.gray300} onClick={handleDotsClick} />
+                      {isModalOpen && (
+                        <EditDeleteModal
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                        />
+                      )}
+                    </div>
+                  </S.StudentRow>
+                </S.TableBody>
+              ) : (
+                <NoPage />
+              )
+            }
+
           </S.StudentTable>
 
         </S.StudentTableSection>
