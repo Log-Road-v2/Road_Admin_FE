@@ -103,7 +103,9 @@ const StudentManager = () => {
 
           <S.StudentTable>
             <S.TableHeaderRow>
-              {tableHeaderLabel.map((label, index) => <S.TableHeaderCell key={index}>{label}</S.TableHeaderCell>)}
+              {tableHeaderLabel.map((label, index) => (
+                <S.TableHeaderCell key={index}>{label}</S.TableHeaderCell>
+              ))}
             </S.TableHeaderRow>
             <S.TableBody>
               <S.StudentRow>
@@ -115,7 +117,7 @@ const StudentManager = () => {
                   <S.Text>임다영</S.Text>
                   <S.HighlightedText>재학중</S.HighlightedText>
                 </S.StudentDataGroup>
-                
+
                 <div style={{ position: "relative" }} ref={modalRef}>
                   <Dots size={20} color={Color.gray300} onClick={handleDotsClick} />
                   {isModalOpen && (

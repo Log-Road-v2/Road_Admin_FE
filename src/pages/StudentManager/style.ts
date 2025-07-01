@@ -93,6 +93,7 @@ export const StudentRow = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 12px 54px 16px;
+  border-bottom: 1px solid ${Color.gray200};
 `;
 
 export const StudentDataGroup = styled.div`
@@ -101,13 +102,13 @@ export const StudentDataGroup = styled.div`
 `;
 
 export const HighlightedText = styled.span`
-  width: 160px;
+  width: 120px;
   ${Font.regular14}
   color: ${Color.blue300};
 `;
 
 export const Text = styled.span`
-  width: 160px;
+  width: 120px;
   ${Font.regular14}
   color: ${Color.gray400};
 `;
