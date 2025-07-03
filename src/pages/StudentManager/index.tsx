@@ -7,6 +7,7 @@ import { Color } from "../../styles";
 import { useState, useRef, useEffect } from "react";
 import { EditDeleteModal } from "../../components/Manager/EditDeleteModal";
 import NoPage from "../../components/NoPage";
+import { handleUpload } from "../../apis/student";
 
 const StudentManager = () => {
   const tableHeaderLabel = ["기수", "학년", "반", "번호", "이름", "상태"];
@@ -37,6 +38,8 @@ const StudentManager = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleDotsClick = () => {
     setIsModalOpen((prev) => !prev);
   };
@@ -49,6 +52,13 @@ const StudentManager = () => {
   const handleDelete = () => {
     setIsModalOpen(false);
     console.log("삭제하기 클릭");
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await handleUpload(file);
+    e.target.value = "";
   };
 
   useEffect(() => {
@@ -142,7 +152,15 @@ const StudentManager = () => {
 
         </S.StudentTableSection>
 
-        <S.AddDocumentButton>
+        <input
+          type="file"
+          accept=".xlsx"
+          style={{ display: "none" }}
+          ref={fileInputRef}
+          onChange={handleFileChange}
+        />
+
+        <S.AddDocumentButton onClick={() => fileInputRef.current?.click()}>
           <Writer size={16} color={Color.white} />
           <S.AddDocumentText>학생 문서 추가</S.AddDocumentText>
         </S.AddDocumentButton>
