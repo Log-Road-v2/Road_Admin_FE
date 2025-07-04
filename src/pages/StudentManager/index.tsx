@@ -93,6 +93,7 @@ const StudentManager = () => {
 
   const [students, setStudents] = useState<Student[]>([]);
   const [allStudents, setAllStudents] = useState<Student[]>([]); // 전체 데이터 저장
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]); // 필터링된 학생 리스트
   const [totalStudent, setTotalStudent] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -107,11 +108,9 @@ const StudentManager = () => {
       const data = await getStudentList(); // 파라미터 없이 전체 데이터 요청
       console.log('전체 학생 데이터 응답:', data);
       setAllStudents(data.students);
-      setTotalStudent(data.students.length);
     } catch (error) {
       console.error('학생 목록 조회 실패:', error);
       setAllStudents([]);
-      setTotalStudent(0);
     }
     setLoading(false);
   };
@@ -121,14 +120,31 @@ const StudentManager = () => {
     fetchAllStudents();
   }, []);
 
+  // 검색/필터링된 학생 리스트 계산
+  useEffect(() => {
+    let filtered = allStudents;
+    if (keyword.trim()) {
+      filtered = filtered.filter(student =>
+        student.name.toLowerCase().includes(keyword.trim().toLowerCase())
+      );
+    }
+    if (selectedGrade !== undefined) {
+      filtered = filtered.filter(student => student.grade === selectedGrade);
+    }
+    if (selectedClass !== undefined) {
+      filtered = filtered.filter(student => student.classNumber === selectedClass);
+    }
+    setFilteredStudents(filtered);
+    setTotalStudent(filtered.length);
+  }, [allStudents, keyword, selectedGrade, selectedClass]);
+
   // 현재 페이지에 해당하는 데이터만 필터링
   useEffect(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const currentPageData = allStudents.slice(startIndex, endIndex);
-    console.log(`학생 페이지 ${currentPage} 데이터:`, currentPageData);
+    const currentPageData = filteredStudents.slice(startIndex, endIndex);
     setStudents(currentPageData);
-  }, [currentPage, allStudents, pageSize]);
+  }, [currentPage, filteredStudents, pageSize]);
 
   return (
     <S.ManagerContainer>
