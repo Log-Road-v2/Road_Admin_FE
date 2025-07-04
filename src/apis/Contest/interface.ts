@@ -29,6 +29,7 @@ export interface Contest {
 
 export interface ContestListResponse {
   contests: Contest[];
+  totalContests?: number;
 }
 
 export interface ContestDetailResponse {

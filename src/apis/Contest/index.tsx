@@ -6,8 +6,28 @@ export const createContest = async (data: CreateContestRequest) => {
   return response.data;
 };
 
-export const getContestList = async (): Promise<ContestListResponse> => {
-  const response = await instance.get(`/contest`);
+export const getContestList = async (offset?: number, limit?: number): Promise<ContestListResponse> => {
+  // 서버에서 다양한 페이지네이션 파라미터명을 사용할 수 있으므로 여러 가지로 시도
+  const params: any = {};
+  
+  if (offset !== undefined) {
+    params.offset = offset;
+    params.page = Math.floor(offset / (limit || 10)) + 1; // offset을 page로 변환
+  }
+  
+  if (limit !== undefined) {
+    params.limit = limit;
+    params.size = limit;
+    params.per_page = limit;
+  }
+  
+  console.log('Contest API 요청 파라미터:', params);
+  
+  const response = await instance.get(`/contest`, {
+    params,
+  });
+  
+  console.log('Contest API 응답:', response.data);
   return response.data;
 };
 

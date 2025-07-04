@@ -23,19 +23,17 @@ const StudentManager = () => {
   const classOptions = [1, 2, 3, 4];
 
   const handleSearch = () => {
+    // 검색 시 첫 페이지로 이동
+    setCurrentPage(1);
     // 실제 검색 API 호출
     console.log("검색어:", keyword);
   };
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalDataCount = 53; // 전체 학생 수
-  const pageSize = 10; // 한 페이지당 항목 수
-  const totalPages = Math.ceil(totalDataCount / pageSize); // 총 페이지 수 계산
-
   const handlePageChange = (page: number) => {
+    console.log(`학생 페이지 변경: ${currentPage} → ${page}`);
     setCurrentPage(page);
-    // 페이지 변경 시 처리할 로직 작성
   };
 
   const [openedModalId, setOpenedModalId] = useState<number | null>(null);
@@ -71,19 +69,8 @@ const StudentManager = () => {
       await deleteStudent(selectedStudent.id);
       setDeleteModalOpen(false);
       setSelectedStudent(null);
-      // 새로고침
-      setLoading(true);
-      getStudentList((currentPage - 1) * pageSize, pageSize)
-        .then((data: StudentListResponse) => {
-          setStudents(data.students);
-          setTotalStudent(data.totalStudent);
-          setLoading(false);
-        })
-        .catch(() => {
-          setStudents([]);
-          setTotalStudent(0);
-          setLoading(false);
-        });
+      // 새로고침 - 전체 데이터 다시 가져오기
+      fetchAllStudents();
     } catch (err) {
       window.alert("삭제에 실패했습니다.");
     }
@@ -105,23 +92,43 @@ const StudentManager = () => {
   }, []);
 
   const [students, setStudents] = useState<Student[]>([]);
+  const [allStudents, setAllStudents] = useState<Student[]>([]); // 전체 데이터 저장
   const [totalStudent, setTotalStudent] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const pageSize = 10; // 한 페이지당 항목 수
+  const totalPages = Math.ceil(totalStudent / pageSize); // 총 페이지 수 계산
+
+  // 전체 데이터를 가져오는 함수
+  const fetchAllStudents = async () => {
     setLoading(true);
-    getStudentList((currentPage - 1) * pageSize, pageSize)
-      .then((data: StudentListResponse) => {
-        setStudents(data.students);
-        setTotalStudent(data.totalStudent);
-        setLoading(false);
-      })
-      .catch(() => {
-        setStudents([]);
-        setTotalStudent(0);
-        setLoading(false);
-      });
-  }, [currentPage, pageSize]);
+    try {
+      console.log('전체 학생 데이터 요청');
+      const data = await getStudentList(); // 파라미터 없이 전체 데이터 요청
+      console.log('전체 학생 데이터 응답:', data);
+      setAllStudents(data.students);
+      setTotalStudent(data.students.length);
+    } catch (error) {
+      console.error('학생 목록 조회 실패:', error);
+      setAllStudents([]);
+      setTotalStudent(0);
+    }
+    setLoading(false);
+  };
+
+  // 초기 로딩 시 전체 데이터 가져오기
+  useEffect(() => {
+    fetchAllStudents();
+  }, []);
+
+  // 현재 페이지에 해당하는 데이터만 필터링
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const currentPageData = allStudents.slice(startIndex, endIndex);
+    console.log(`학생 페이지 ${currentPage} 데이터:`, currentPageData);
+    setStudents(currentPageData);
+  }, [currentPage, allStudents, pageSize]);
 
   return (
     <S.ManagerContainer>
@@ -171,7 +178,9 @@ const StudentManager = () => {
             </S.TableHeaderRow>
             {
               loading ? (
-                <div>로딩중...</div>
+                <div style={{ textAlign: 'center', padding: '40px', color: Color.gray500 }}>
+                  데이터를 불러오는 중...
+                </div>
               ) : students.length > 0 ? (
                 <S.TableBody>
                   {students.map((student) => (
@@ -219,7 +228,7 @@ const StudentManager = () => {
         </S.AddDocumentButton>
       </S.Content>
 
-      {students.length > pageSize && (
+      {!loading && totalStudent > pageSize && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -234,19 +243,8 @@ const StudentManager = () => {
           student={selectedStudent}
           onSuccess={() => {
             setEditModalOpen(false);
-            // 새로고침
-            setLoading(true);
-            getStudentList((currentPage - 1) * pageSize, pageSize)
-              .then((data: StudentListResponse) => {
-                setStudents(data.students);
-                setTotalStudent(data.totalStudent);
-                setLoading(false);
-              })
-              .catch(() => {
-                setStudents([]);
-                setTotalStudent(0);
-                setLoading(false);
-              });
+            // 새로고침 - 전체 데이터 다시 가져오기
+            fetchAllStudents();
           }}
         />
       )}

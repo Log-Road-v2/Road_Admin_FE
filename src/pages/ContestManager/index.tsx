@@ -21,17 +21,19 @@ const ContestManager = () => {
   const [keyword, setKeyword] = useState("");
 
   const handleSearch = () => {
+    // 검색 시 첫 페이지로 이동
+    setCurrentPage(1);
     // 실제 검색 API 호출
     console.log("검색어:", keyword);
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-
-  const totalDataCount = 53; // 전체 대회회 수
+  const [totalContests, setTotalContests] = useState(0);
   const pageSize = 10; // 한 페이지당 항목 수
-  const totalPages = Math.ceil(totalDataCount / pageSize); // 총 페이지 수 계산
+  const totalPages = Math.ceil(totalContests / pageSize); // 총 페이지 수 계산
 
   const handlePageChange = (page: number) => {
+    console.log(`페이지 변경: ${currentPage} → ${page}`);
     setCurrentPage(page);
   };
 
@@ -61,6 +63,7 @@ const ContestManager = () => {
   }, []);
 
   const [contests, setContests] = useState<Contest[]>([]);
+  const [allContests, setAllContests] = useState<Contest[]>([]); // 전체 데이터 저장
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -69,19 +72,36 @@ const ContestManager = () => {
   const [selectedState, setSelectedState] = useState<CONTEST_STATE | "">("");
   const [stateChangeError, setStateChangeError] = useState<string | null>(null);
 
+  // 전체 데이터를 가져오는 함수
+  const fetchAllContests = async () => {
+    setLoading(true);
+    try {
+      console.log('전체 대회 데이터 요청');
+      const data = await getContestList(); // 파라미터 없이 전체 데이터 요청
+      console.log('전체 대회 데이터 응답:', data);
+      setAllContests(data.contests);
+      setTotalContests(data.contests.length);
+    } catch (e) {
+      console.error('대회 목록 조회 실패:', e);
+      setAllContests([]);
+      setTotalContests(0);
+    }
+    setLoading(false);
+  };
+
+  // 초기 로딩 시 전체 데이터 가져오기
   useEffect(() => {
-    const fetchContests = async () => {
-      setLoading(true);
-      try {
-        const data = await getContestList();
-        setContests(data.contests);
-      } catch (e) {
-        setContests([]);
-      }
-      setLoading(false);
-    };
-    fetchContests();
+    fetchAllContests();
   }, []);
+
+  // 현재 페이지에 해당하는 데이터만 필터링
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const currentPageData = allContests.slice(startIndex, endIndex);
+    console.log(`페이지 ${currentPage} 데이터:`, currentPageData);
+    setContests(currentPageData);
+  }, [currentPage, allContests, pageSize]);
 
   const handleStateChange = () => {
     setStateModalOpen(true);
@@ -98,17 +118,8 @@ const ContestManager = () => {
       await updateContestState(selectedContest.id, { state: selectedState as CONTEST_STATE });
       setStateModalOpen(false);
       setStateChangeLoading(false);
-      // 새로고침
-      setLoading(true);
-      getContestList()
-        .then((data) => {
-          setContests(data.contests);
-          setLoading(false);
-        })
-        .catch(() => {
-          setContests([]);
-          setLoading(false);
-        });
+      // 새로고침 - 전체 데이터 다시 가져오기
+      fetchAllContests();
     } catch (err) {
       setStateChangeError("상태 변경에 실패했습니다.");
       setStateChangeLoading(false);
@@ -128,7 +139,7 @@ const ContestManager = () => {
 
         <S.ContestTableSection>
           <S.TableTopBar>
-            <S.TotalCountText>전체 {contests.length}건</S.TotalCountText>
+            <S.TotalCountText>전체 {totalContests}건</S.TotalCountText>
 
             <S.ControlsWrapper>
               <Plus size={24} color={Color.gray500} />
@@ -148,7 +159,9 @@ const ContestManager = () => {
             </S.TableHeaderRow>
             {
               loading ? (
-                <div>로딩중...</div>
+                <div style={{ textAlign: 'center', padding: '40px', color: Color.gray500 }}>
+                  데이터를 불러오는 중...
+                </div>
               ) : contests.length > 0 ? (
                 <S.TableBody>
                   {contests.map((contest) => (
@@ -186,7 +199,7 @@ const ContestManager = () => {
         </S.ContestTableSection>
       </S.Content>
 
-      {contests.length > pageSize && (
+      {!loading && totalContests > pageSize && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
