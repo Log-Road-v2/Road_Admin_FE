@@ -142,7 +142,7 @@ const ContestManager = () => {
             <S.TotalCountText>전체 {totalContests}건</S.TotalCountText>
 
             <S.ControlsWrapper>
-              <Plus size={24} color={Color.gray500} />
+              <Plus size={24} color={Color.gray500} onClick={() => navigate('/contest')} />
               <Search
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
