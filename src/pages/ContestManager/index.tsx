@@ -96,12 +96,18 @@ const ContestManager = () => {
 
   // 현재 페이지에 해당하는 데이터만 필터링
   useEffect(() => {
+    let filtered = allContests;
+    if (keyword.trim()) {
+      filtered = allContests.filter(contest =>
+        contest.name.toLowerCase().includes(keyword.trim().toLowerCase())
+      );
+    }
+    setTotalContests(filtered.length);
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const currentPageData = allContests.slice(startIndex, endIndex);
-    console.log(`페이지 ${currentPage} 데이터:`, currentPageData);
+    const currentPageData = filtered.slice(startIndex, endIndex);
     setContests(currentPageData);
-  }, [currentPage, allContests, pageSize]);
+  }, [currentPage, allContests, pageSize, keyword]);
 
   const handleStateChange = () => {
     setStateModalOpen(true);

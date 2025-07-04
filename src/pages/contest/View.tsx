@@ -30,7 +30,7 @@ const View = () => {
         </S.ContentWrapper>
   
         <S.ButtonWrapper>
-          <SubmitButton text="뒤로가기" disabled={true} onClick={() => {}} />
+          <SubmitButton text="뒤로가기" disabled={false} onClick={() => navigate('/contestlist')} />
         </S.ButtonWrapper>
       </S.Container>
     </>
