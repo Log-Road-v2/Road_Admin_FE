@@ -16,7 +16,7 @@ const SubmitButton = ({ text, disabled = false, onClick }: PropsButtonType) => {
 const Button = styled.button<{
   disabled?: boolean;
 }>`
-  width: 180px;
+  width: 360px;
   height: 44px;
   padding: 12px 56px;
   border-radius: 8px;

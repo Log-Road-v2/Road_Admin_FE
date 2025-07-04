@@ -4,13 +4,13 @@ const NavigationListData: NavigationListDataType[] = [
   {
     id: 1,
     name: "대회관리",
-    href: "/",
+    href: "/contestlist",
     login: true
   },
   {
     id: 2,
     name: "인원관리",
-    href: "/",
+    href: "/student",
     login: true
   },
   {

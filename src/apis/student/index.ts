@@ -7,7 +7,7 @@ export const getStudentList = async (offset?: number, limit?: number): Promise<S
   
   if (offset !== undefined) {
     params.offset = offset;
-    params.page = Math.floor(offset / (limit || 10)) + 1; // offset을 page로 변환
+    params.page = Math.floor(offset / (limit || 10)) + 1; 
   }
   
   if (limit !== undefined) {

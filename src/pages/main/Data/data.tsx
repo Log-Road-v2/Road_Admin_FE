@@ -42,16 +42,16 @@ const ShortcutData: ShortcutDataType[] = [
 
 const NavigationListData: NavigationListDataType[] = [
   {
-    id: "Medal",
+    id: "Contest",
     title: "대회관리",
     icon: <Medal />,
-    href: "/medal"
+    href: "/contestlist"
   },
   {
-    id: "People",
+    id: "Student",
     title: "인원관리",
     icon: <People />,
-    href: "/people"
+    href: "/student"
   },
   {
     id: "Club",

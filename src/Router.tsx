@@ -6,6 +6,9 @@ import ContestManager from "./pages/ContestManager"
 import View from "./pages/contest/View"
 import ContestEdit from "./pages/contest/Edit"
 import Contest from "./pages/contest"
+import { LoginPage } from "./pages/Auth/Login"
+import Main from "./pages/main"
+
 
 export const Router = () => {
   return (
@@ -13,6 +16,8 @@ export const Router = () => {
       <GlobalStyle />
       <Routes>
         <Route element={<Layout />}>
+        <Route path="/main" element={<Main />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/student" element={<StudentManager />} />
           <Route path="/contest" element={<Contest />} />
           <Route path="/contestlist" element={<ContestManager />} />
