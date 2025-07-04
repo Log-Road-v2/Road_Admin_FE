@@ -5,7 +5,6 @@ import Color from "../styles/Color";
 import { Cancel } from "../assets/Cancel";
 import RoundButton from "./Common/Button/RoundButton";
 
-
 interface PropsType {
    title?: string;
    subTitle?: string;
@@ -16,10 +15,8 @@ interface PropsType {
 }
 
 const Modal = ({ title, subTitle, text, children, isOpen, onClose }: PropsType) => {
-
    useEffect(() => {
       document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-
       return () => {
          document.body.style.overflow = 'auto';
       };
@@ -87,6 +84,5 @@ const Line = styled.hr`
    margin: 0;
    border: 1px solid black;
 `
-
 
 export default Modal;

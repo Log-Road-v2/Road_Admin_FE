@@ -4,13 +4,18 @@ import { Color, Font } from "../../styles";
 interface EditDeleteModalProps {
   onEdit: () => void;
   onDelete: () => void;
+  onStateChange?: () => void;
 }
 
-export const EditDeleteModal = ({ onEdit, onDelete }: EditDeleteModalProps) => {
+export const EditDeleteModal = ({ onEdit, onDelete, onStateChange }: EditDeleteModalProps) => {
   return (
     <ModalContainer>
       <OptionButton onClick={onEdit}>
         <OptionText>수정하기</OptionText>
+      </OptionButton>
+      <Divider />
+      <OptionButton onClick={onStateChange}>
+        <OptionText>진행상태 변경</OptionText>
       </OptionButton>
       <Divider />
       <OptionButton onClick={onDelete}>
@@ -23,8 +28,8 @@ export const EditDeleteModal = ({ onEdit, onDelete }: EditDeleteModalProps) => {
 const ModalContainer = styled.div`
   position: absolute;
   top: 24px;
-  right: 0;
-  width: 120px;
+  right: 30px;
+  width: 150px;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -37,6 +42,9 @@ const OptionButton = styled.div`
   justify-content: center;
   align-items: center;
   padding: 12px 32px;
+  background-color: ${Color.blue500}
+  width: 100%
+  height: 100%
 
   &:hover {
     background-color: ${Color.gray100};

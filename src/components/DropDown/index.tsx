@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Arrow } from "../../assets";
-import { Font, Color } from "../../styles";
+import { Arrow } from "../../assets/Arrow";
 import styled from "@emotion/styled";
+import Color from "../../styles/Color";
+import Font from "../../styles/Font";
 
 interface PropsType<T> {
   val: T | undefined;
@@ -43,31 +44,24 @@ const DropDown = <T,>({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const renderLabel = (value: T | undefined) => {
-    if (!value) return describe;
-    return typeof value === "object" && value !== null && "name" in value
-      ? (value as any).name
-      : String(value);
-  };
-
   return (
     <DropDownContainer width={width}>
       {label && <Label>{label}</Label>}
 
       <DropDownBox onClick={toggleOpen}>
-        <Describe>{renderLabel(val)}</Describe>
+        <Describe>{val ? String(val) : describe}</Describe>
 
         {isOpen ? (
-          <Arrow size={20} color={Color.gray300} rotate="bottom" />
+          <Arrow size={20} color={Color.gray300}  />
         ) : (
-          <Arrow size={20} color={Color.gray300} />
+          <Arrow size={20} color={Color.gray300} rotate="bottom" />
         )}
       </DropDownBox>
       {isOpen && (
         <DropDownListBox isOpen={isOpen}>
           {items.map((item, index) => (
             <DropDownItem key={index} onClick={() => clickItem(item)}>
-              {renderLabel(item)}
+              {String(item)}
             </DropDownItem>
           ))}
         </DropDownListBox>
@@ -113,7 +107,7 @@ const DropDownListBox = styled.div<{
   isOpen?: boolean;
 }>`
   position: absolute;
-  top: 72px;
+  top: 54px;
   width: 100%;
   max-height: 320px;
   display: flex;

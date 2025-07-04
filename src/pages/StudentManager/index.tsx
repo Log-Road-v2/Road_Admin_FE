@@ -7,7 +7,10 @@ import { Color } from "../../styles";
 import { useState, useRef, useEffect } from "react";
 import { EditDeleteModal } from "../../components/Manager/EditDeleteModal";
 import NoPage from "../../components/NoPage";
-import { handleUpload } from "../../apis/student";
+import { getStudentList, deleteStudent } from "../../apis/student/index";
+import { Student, StudentListResponse } from "../../apis/student/interface";
+import StudentEditModal from "../../components/Student/StudentEditModal";
+import StudentDeleteModal from "../../components/Student/StudentDeleteModal";
 
 const StudentManager = () => {
   const tableHeaderLabel = ["기수", "학년", "반", "번호", "이름", "상태"];
@@ -35,43 +38,90 @@ const StudentManager = () => {
     // 페이지 변경 시 처리할 로직 작성
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openedModalId, setOpenedModalId] = useState<number | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDotsClick = () => {
-    setIsModalOpen((prev) => !prev);
+  const handleDotsClick = (id: number) => {
+    setOpenedModalId(prev => (prev === id ? null : id));
   };
 
-  const handleEdit = () => {
-    setIsModalOpen(false);
-    console.log("수정하기 클릭");
+  const handleEdit = (student: Student) => {
+    setEditModalOpen(true);
+    setSelectedStudent(student);
+    setOpenedModalId(null);
   };
 
-  const handleDelete = () => {
-    setIsModalOpen(false);
-    console.log("삭제하기 클릭");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleDelete = async (student?: Student) => {
+    setOpenedModalId(null);
+    if (!student) return;
+    setSelectedStudent(student);
+    setDeleteModalOpen(true);
+  };
+
+  // 실제 삭제 실행 함수
+  const handleDeleteConfirm = async () => {
+    if (!selectedStudent) return;
+    try {
+      await deleteStudent(selectedStudent.id);
+      setDeleteModalOpen(false);
+      setSelectedStudent(null);
+      // 새로고침
+      setLoading(true);
+      getStudentList((currentPage - 1) * pageSize, pageSize)
+        .then((data: StudentListResponse) => {
+          setStudents(data.students);
+          setTotalStudent(data.totalStudent);
+          setLoading(false);
+        })
+        .catch(() => {
+          setStudents([]);
+          setTotalStudent(0);
+          setLoading(false);
+        });
+    } catch (err) {
+      window.alert("삭제에 실패했습니다.");
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await handleUpload(file);
+    // 파일 업로드 기능은 추후 구현
     e.target.value = "";
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setIsModalOpen(false);
+        setOpenedModalId(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const hasStudentData = true;
+  const [students, setStudents] = useState<Student[]>([]);
+  const [totalStudent, setTotalStudent] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    getStudentList((currentPage - 1) * pageSize, pageSize)
+      .then((data: StudentListResponse) => {
+        setStudents(data.students);
+        setTotalStudent(data.totalStudent);
+        setLoading(false);
+      })
+      .catch(() => {
+        setStudents([]);
+        setTotalStudent(0);
+        setLoading(false);
+      });
+  }, [currentPage, pageSize]);
 
   return (
     <S.ManagerContainer>
@@ -86,7 +136,7 @@ const StudentManager = () => {
 
         <S.StudentTableSection>
           <S.TableTopBar>
-            <S.TotalCountText>전체 10건</S.TotalCountText>
+            <S.TotalCountText>전체 {totalStudent}건</S.TotalCountText>
 
             <S.ControlsWrapper>
               <Reset size={20} color={Color.gray300} />
@@ -120,28 +170,31 @@ const StudentManager = () => {
               ))}
             </S.TableHeaderRow>
             {
-              hasStudentData ? (
+              loading ? (
+                <div>로딩중...</div>
+              ) : students.length > 0 ? (
                 <S.TableBody>
-                  <S.StudentRow>
-                    <S.StudentDataGroup>
-                      <S.HighlightedText>1</S.HighlightedText>
-                      <S.Text>3</S.Text>
-                      <S.Text>1</S.Text>
-                      <S.Text>14</S.Text>
-                      <S.Text>임다영</S.Text>
-                      <S.HighlightedText>재학중</S.HighlightedText>
-                    </S.StudentDataGroup>
-
-                    <div style={{ position: "relative" }} ref={modalRef}>
-                      <Dots size={20} color={Color.gray300} onClick={handleDotsClick} />
-                      {isModalOpen && (
-                        <EditDeleteModal
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      )}
-                    </div>
-                  </S.StudentRow>
+                  {students.map((student) => (
+                    <S.StudentRow key={student.id}>
+                      <S.StudentDataGroup>
+                        <S.HighlightedText>{student.generation}</S.HighlightedText>
+                        <S.Text>{student.grade ?? '-'}</S.Text>
+                        <S.Text>{student.classNumber ?? '-'}</S.Text>
+                        <S.Text>{student.studentNumber ?? '-'}</S.Text>
+                        <S.Text>{student.name}</S.Text>
+                        <S.HighlightedText>{student.state}</S.HighlightedText>
+                      </S.StudentDataGroup>
+                      <div style={{ position: "relative" }} ref={modalRef}>
+                        <Dots size={20} color={Color.gray300} onClick={() => handleDotsClick(student.id)} />
+                        {openedModalId === student.id && (
+                          <EditDeleteModal
+                            onEdit={() => handleEdit(student)}
+                            onDelete={() => handleDelete(student)}
+                          />
+                        )}
+                      </div>
+                    </S.StudentRow>
+                  ))}
                 </S.TableBody>
               ) : (
                 <NoPage />
@@ -166,11 +219,45 @@ const StudentManager = () => {
         </S.AddDocumentButton>
       </S.Content>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {students.length > pageSize && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
+
+      {selectedStudent && (
+        <StudentEditModal
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          student={selectedStudent}
+          onSuccess={() => {
+            setEditModalOpen(false);
+            // 새로고침
+            setLoading(true);
+            getStudentList((currentPage - 1) * pageSize, pageSize)
+              .then((data: StudentListResponse) => {
+                setStudents(data.students);
+                setTotalStudent(data.totalStudent);
+                setLoading(false);
+              })
+              .catch(() => {
+                setStudents([]);
+                setTotalStudent(0);
+                setLoading(false);
+              });
+          }}
+        />
+      )}
+      {selectedStudent && (
+        <StudentDeleteModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          student={selectedStudent}
+          onDelete={handleDeleteConfirm}
+        />
+      )}
     </S.ManagerContainer >
   )
 }

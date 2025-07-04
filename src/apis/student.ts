@@ -1,4 +1,4 @@
-import { instance } from "./index";
+import { instance } from "./Axios";
 
 const path = '/student'
 
